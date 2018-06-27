@@ -27,11 +27,15 @@ getReferences = (node) ->
 
   return refs
 
-compile = (inputPath, render, options) ->
+compile = (inputPath, render, options, compileOptions={}) ->
   if render
     pug.renderFile inputPath, options
   else
-    'module.exports=template;' + pug.compileFileClient inputPath, options
+    compiled = pug[compileOptions.method] inputPath, options
+    if compileOptions.export
+      'module.exports=template;' + compiled
+    else
+      compiled
 
 makeOutputPath = (outputPath, render) ->
   if render
@@ -46,6 +50,12 @@ class BroccoliPug extends Plugin
     unless @ instanceof BroccoliPug
       return new BroccoliPug inputNodes, options
     @render = options?.render or false
+
+    @compileOptions =
+      method: 'compileFileClient'
+      export: true
+    @compileOptions = Object.assign(@compileOptions, options?.compileOptions)
+
     @pugOptions = options?.pugOptions or {}
     super inputNodes, options
 
@@ -126,7 +136,7 @@ class BroccoliPug extends Plugin
               meta[relativePath] = {dependencies, mtime}
 
               # Write compiled file to cache and symlink to output
-              compiled = compile fullPath, @render, @pugOptions
+              compiled = compile fullPath, @render, @pugOptions, @compileOptions
 
               fs.writeFileAsync cachePath, compiled
                 .then -> symlink cachePath, outputPath
