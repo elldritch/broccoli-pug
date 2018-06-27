@@ -14,6 +14,10 @@ by combining nodes using `broccoli-merge`.
 var Pug = require('broccoli-pug');
 var html = new Pug([inputNode1, inputNode2], {
   render: true,
+  compileOptions: {
+    method: 'compileFileClient',
+    exports: true,
+  },
   pugOptions: {
     // ...
   }
@@ -27,6 +31,10 @@ var html = new Pug([inputNode1, inputNode2], {
 
 `options.render` is a boolean. If true, `broccoli-pug` will render templates to
 HTML rather than compiling to a JS function.
+
+`options.compileOptions.method` specifies which of `pugjs`'s compile methods to be used. Defaults to 'compileFileClient'.
+
+`options.compileOptions.export` is a boolean. If true, it will add `module.exports=template;` to export the template function.
 
 `options.pugOptions` specifies options for the `pug` compiler. It is passed
 directly to the compiler.
